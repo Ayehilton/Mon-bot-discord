@@ -1,9 +1,12 @@
-import { type Message, PermissionFlagsBits, Events } from "discord.js";
+import { type Message, PermissionFlagsBits } from "discord.js";
 import { spamMap, SPAM_THRESHOLD, SPAM_WINDOW_MS, MUTE_DURATION_MS } from "../store.js";
 import { logger } from "../../lib/logger.js";
+import { handleMessageCommand } from "../handlers/messageCommandRouter.js";
 
 export async function onMessageCreate(message: Message) {
   if (message.author.bot || !message.guild) return;
+
+  await handleMessageCommand(message);
 
   const userId = message.author.id;
   const now = Date.now();
@@ -19,9 +22,7 @@ export async function onMessageCreate(message: Message) {
     spamMap.delete(userId);
 
     const member = message.guild.members.cache.get(userId);
-    if (!member) return;
-
-    if (!member.moderatable) return;
+    if (!member || !member.moderatable) return;
 
     const botMember = message.guild.members.me;
     if (!botMember?.permissions.has(PermissionFlagsBits.ModerateMembers)) return;
