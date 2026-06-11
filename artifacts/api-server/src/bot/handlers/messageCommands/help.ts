@@ -35,6 +35,10 @@ export async function helpMessage(message: Message) {
       {
         name: "💳 Paiements",
         value: "`!paiement` — Afficher les moyens de paiement",
+      },
+      {
+        name: "🗑️ Clear",
+        value: "`!clear <nombre>` — Supprimer des messages (1-100)",
       }
     )
     .setFooter({ text: "Préfixe: !" })

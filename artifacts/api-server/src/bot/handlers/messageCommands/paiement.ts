@@ -17,12 +17,6 @@ export async function paiementMessage(message: Message) {
           "Paiement via PayPal (Amis & Famille).\n> ⚠️ **Amis & Famille uniquement** — Pas de remboursement automatique\n> Demande l'adresse PayPal en ouvrant un ticket.",
         inline: false,
       },
-      {
-        name: "🟢 Robux (Roblox)",
-        value:
-          "Paiement en Robux via game pass ou groupe Roblox.\n> Montant converti au taux actuel\n> Demande les détails en ouvrant un ticket.",
-        inline: false,
-      }
     )
     .setColor(0x5865f2)
     .setFooter({
