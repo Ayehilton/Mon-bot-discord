@@ -20,6 +20,7 @@ export interface TicketData {
   guildId: string;
   createdAt: Date;
   reason: string;
+  category?: string;
   messages: { author: string; content: string; timestamp: Date }[];
 }
 

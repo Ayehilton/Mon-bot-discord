@@ -5,7 +5,7 @@ import {
 } from "discord.js";
 import type { ExtendedClient } from "../types.js";
 import { logger } from "../../lib/logger.js";
-import { handleTicketButton } from "../handlers/ticketHandler.js";
+import { handleTicketButton, handleTicketCategorySelect } from "../handlers/ticketHandler.js";
 import { handleRatingSelect } from "../handlers/ratingHandler.js";
 import { handleGiveawayJoin } from "../handlers/giveawayHandler.js";
 
@@ -42,6 +42,10 @@ export async function onInteractionCreate(interaction: Interaction) {
   }
 
   if (interaction instanceof StringSelectMenuInteraction) {
+    if (interaction.customId.startsWith("ticket_category_")) {
+      await handleTicketCategorySelect(interaction);
+      return;
+    }
     if (interaction.customId.startsWith("rating_")) {
       await handleRatingSelect(interaction);
     }
