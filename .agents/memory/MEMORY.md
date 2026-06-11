@@ -1,0 +1,1 @@
+- [Discord bot intents](discord-bot-intents.md) — Intents privilégiés doivent être opt-in via env vars pour ne pas bloquer le démarrage
