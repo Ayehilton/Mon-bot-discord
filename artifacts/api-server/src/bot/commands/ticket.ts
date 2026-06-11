@@ -30,7 +30,7 @@ export const execute: SlashCommand["execute"] = async (
     ) {
       await interaction.reply({
         content: "❌ Tu n'as pas la permission.",
-        ephemeral: true,
+        flags: 64,
       });
       return;
     }
@@ -66,7 +66,7 @@ export const execute: SlashCommand["execute"] = async (
     if (guildTickets.length === 0) {
       await interaction.reply({
         content: "📭 Aucun ticket ouvert.",
-        ephemeral: true,
+        flags: 64,
       });
       return;
     }
@@ -80,6 +80,6 @@ export const execute: SlashCommand["execute"] = async (
           .join("\n")
       );
 
-    await interaction.reply({ embeds: [embed], ephemeral: true });
+    await interaction.reply({ embeds: [embed], flags: 64 });
   }
 };

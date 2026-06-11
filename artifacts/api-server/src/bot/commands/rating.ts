@@ -27,7 +27,7 @@ export const execute: SlashCommand["execute"] = async (
 
   if (sub === "panel") {
     if (!interaction.memberPermissions?.has(PermissionFlagsBits.ManageGuild)) {
-      await interaction.reply({ content: "❌ Permission refusée.", ephemeral: true });
+      await interaction.reply({ content: "❌ Permission refusée.", flags: 64 });
       return;
     }
 
@@ -69,7 +69,7 @@ export const execute: SlashCommand["execute"] = async (
     const ratings = getRatings();
 
     if (ratings.length === 0) {
-      await interaction.reply({ content: "📭 Aucune évaluation reçue.", ephemeral: true });
+      await interaction.reply({ content: "📭 Aucune évaluation reçue.", flags: 64 });
       return;
     }
 

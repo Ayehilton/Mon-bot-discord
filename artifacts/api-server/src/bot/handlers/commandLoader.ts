@@ -7,6 +7,7 @@ import * as giveawayCmd from "../commands/giveaway.js";
 import * as moderationCmd from "../commands/moderation.js";
 import * as statsCmd from "../commands/stats.js";
 import * as ratingCmd from "../commands/rating.js";
+import * as vouchCmd from "../commands/vouch.js";
 
 const allCommands: SlashCommand[] = [
   ticketCmd,
@@ -14,6 +15,7 @@ const allCommands: SlashCommand[] = [
   moderationCmd,
   statsCmd,
   ratingCmd,
+  vouchCmd,
 ];
 
 export async function loadCommands(client: Client) {

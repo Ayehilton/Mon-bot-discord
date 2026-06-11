@@ -24,7 +24,7 @@ export async function handleRatingSelect(interaction: StringSelectMenuInteractio
         .setColor(0x57f287)
         .setTimestamp(),
     ],
-    ephemeral: true,
+    flags: 64,
   });
 
   logger.info(`Évaluation reçue: ${rating}/5 de ${interaction.user.tag}`);

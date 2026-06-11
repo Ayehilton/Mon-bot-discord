@@ -96,7 +96,7 @@ export const execute: SlashCommand["execute"] = async (
   if (!interaction.memberPermissions?.has(PermissionFlagsBits.ModerateMembers)) {
     await interaction.reply({
       content: "❌ Tu n'as pas la permission de modérer.",
-      ephemeral: true,
+      flags: 64,
     });
     return;
   }
@@ -110,12 +110,12 @@ export const execute: SlashCommand["execute"] = async (
     const member = interaction.guild.members.cache.get(user.id);
 
     if (!member) {
-      await interaction.reply({ content: "❌ Membre introuvable.", ephemeral: true });
+      await interaction.reply({ content: "❌ Membre introuvable.", flags: 64 });
       return;
     }
 
     if (!member.moderatable) {
-      await interaction.reply({ content: "❌ Je ne peux pas muter ce membre.", ephemeral: true });
+      await interaction.reply({ content: "❌ Je ne peux pas muter ce membre.", flags: 64 });
       return;
     }
 
@@ -141,7 +141,7 @@ export const execute: SlashCommand["execute"] = async (
     const member = interaction.guild.members.cache.get(user.id);
 
     if (!member) {
-      await interaction.reply({ content: "❌ Membre introuvable.", ephemeral: true });
+      await interaction.reply({ content: "❌ Membre introuvable.", flags: 64 });
       return;
     }
 
@@ -157,12 +157,12 @@ export const execute: SlashCommand["execute"] = async (
     const member = interaction.guild.members.cache.get(user.id);
 
     if (!member) {
-      await interaction.reply({ content: "❌ Membre introuvable.", ephemeral: true });
+      await interaction.reply({ content: "❌ Membre introuvable.", flags: 64 });
       return;
     }
 
     if (!member.kickable) {
-      await interaction.reply({ content: "❌ Je ne peux pas kick ce membre.", ephemeral: true });
+      await interaction.reply({ content: "❌ Je ne peux pas kick ce membre.", flags: 64 });
       return;
     }
 
@@ -187,7 +187,7 @@ export const execute: SlashCommand["execute"] = async (
     const member = interaction.guild.members.cache.get(user.id);
 
     if (!member?.bannable) {
-      await interaction.reply({ content: "❌ Je ne peux pas bannir ce membre.", ephemeral: true });
+      await interaction.reply({ content: "❌ Je ne peux pas bannir ce membre.", flags: 64 });
       return;
     }
 
@@ -258,7 +258,7 @@ export const execute: SlashCommand["execute"] = async (
         warns.length > 0 ? warns.map((w, i) => `**${i + 1}.** ${w}`).join("\n") : "Aucun avertissement."
       );
 
-    await interaction.reply({ embeds: [embed], ephemeral: true });
+    await interaction.reply({ embeds: [embed], flags: 64 });
   }
 
   if (sub === "clearwarn") {
@@ -267,7 +267,7 @@ export const execute: SlashCommand["execute"] = async (
     warnMap.delete(key);
     await interaction.reply({
       content: `✅ Avertissements de <@${user.id}> effacés.`,
-      ephemeral: true,
+      flags: 64,
     });
   }
 };

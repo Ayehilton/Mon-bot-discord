@@ -7,17 +7,17 @@ export async function handleGiveawayJoin(interaction: ButtonInteraction) {
   const giveaway = giveaways.get(giveawayId);
 
   if (!giveaway) {
-    await interaction.reply({ content: "❌ Ce giveaway n'existe plus.", ephemeral: true });
+    await interaction.reply({ content: "❌ Ce giveaway n'existe plus.", flags: 64 });
     return;
   }
 
   if (giveaway.ended) {
-    await interaction.reply({ content: "❌ Ce giveaway est déjà terminé.", ephemeral: true });
+    await interaction.reply({ content: "❌ Ce giveaway est déjà terminé.", flags: 64 });
     return;
   }
 
   if (new Date() > giveaway.endTime) {
-    await interaction.reply({ content: "❌ Ce giveaway est expiré.", ephemeral: true });
+    await interaction.reply({ content: "❌ Ce giveaway est expiré.", flags: 64 });
     return;
   }
 
@@ -25,13 +25,13 @@ export async function handleGiveawayJoin(interaction: ButtonInteraction) {
     giveaway.participants = giveaway.participants.filter((id) => id !== interaction.user.id);
     await interaction.reply({
       content: "✅ Tu t'es retiré du giveaway.",
-      ephemeral: true,
+      flags: 64,
     });
   } else {
     giveaway.participants.push(interaction.user.id);
     await interaction.reply({
       content: `🎉 Tu participes au giveaway ! (${giveaway.participants.length} participants)`,
-      ephemeral: true,
+      flags: 64,
     });
   }
 

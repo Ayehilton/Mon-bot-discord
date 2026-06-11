@@ -79,7 +79,7 @@ export const execute: SlashCommand["execute"] = async (
     const member = interaction.guild.members.cache.get(user.id);
 
     if (!member) {
-      await interaction.reply({ content: "❌ Membre introuvable.", ephemeral: true });
+      await interaction.reply({ content: "❌ Membre introuvable.", flags: 64 });
       return;
     }
 

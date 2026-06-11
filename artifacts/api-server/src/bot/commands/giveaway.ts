@@ -75,7 +75,7 @@ export const execute: SlashCommand["execute"] = async (
     if (!interaction.memberPermissions?.has(PermissionFlagsBits.ManageGuild)) {
       await interaction.reply({
         content: "❌ Tu n'as pas la permission.",
-        ephemeral: true,
+        flags: 64,
       });
       return;
     }
@@ -101,7 +101,7 @@ export const execute: SlashCommand["execute"] = async (
       .setFooter({ text: "Clique pour participer / re-cliquer pour se retirer" })
       .setTimestamp(endTime);
 
-    await interaction.reply({ content: "🎉 Giveaway créé !", ephemeral: true });
+    await interaction.reply({ content: "🎉 Giveaway créé !", flags: 64 });
 
     const msg = await interaction.channel.send({ embeds: [embed] });
 
@@ -139,7 +139,7 @@ export const execute: SlashCommand["execute"] = async (
     if (!interaction.memberPermissions?.has(PermissionFlagsBits.ManageGuild)) {
       await interaction.reply({
         content: "❌ Tu n'as pas la permission.",
-        ephemeral: true,
+        flags: 64,
       });
       return;
     }
@@ -147,19 +147,19 @@ export const execute: SlashCommand["execute"] = async (
     const msgId = interaction.options.getString("message_id", true);
     const g = giveaways.get(msgId);
     if (!g) {
-      await interaction.reply({ content: "❌ Giveaway introuvable.", ephemeral: true });
+      await interaction.reply({ content: "❌ Giveaway introuvable.", flags: 64 });
       return;
     }
 
     await endGiveaway(msgId, interaction.client);
-    await interaction.reply({ content: "✅ Giveaway terminé !", ephemeral: true });
+    await interaction.reply({ content: "✅ Giveaway terminé !", flags: 64 });
   }
 
   if (sub === "reroll") {
     if (!interaction.memberPermissions?.has(PermissionFlagsBits.ManageGuild)) {
       await interaction.reply({
         content: "❌ Tu n'as pas la permission.",
-        ephemeral: true,
+        flags: 64,
       });
       return;
     }
@@ -169,7 +169,7 @@ export const execute: SlashCommand["execute"] = async (
     if (!g || g.participants.length === 0) {
       await interaction.reply({
         content: "❌ Impossible de reroll (introuvable ou aucun participant).",
-        ephemeral: true,
+        flags: 64,
       });
       return;
     }
@@ -188,7 +188,7 @@ export const execute: SlashCommand["execute"] = async (
     if (active.length === 0) {
       await interaction.reply({
         content: "📭 Aucun giveaway actif.",
-        ephemeral: true,
+        flags: 64,
       });
       return;
     }
@@ -205,6 +205,6 @@ export const execute: SlashCommand["execute"] = async (
           .join("\n")
       );
 
-    await interaction.reply({ embeds: [embed], ephemeral: true });
+    await interaction.reply({ embeds: [embed], flags: 64 });
   }
 };

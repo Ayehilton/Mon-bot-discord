@@ -18,7 +18,7 @@ export async function onInteractionCreate(interaction: Interaction) {
       await command.execute(interaction);
     } catch (err) {
       logger.error({ err }, `Erreur commande ${interaction.commandName}`);
-      const msg = { content: "Une erreur est survenue.", ephemeral: true };
+      const msg = { content: "Une erreur est survenue.", flags: 64 };
       if (interaction.replied || interaction.deferred) {
         await interaction.followUp(msg);
       } else {

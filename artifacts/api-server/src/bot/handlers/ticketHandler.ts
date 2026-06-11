@@ -27,12 +27,12 @@ async function openTicket(interaction: ButtonInteraction) {
   if (existing) {
     await interaction.reply({
       content: `❌ Tu as déjà un ticket ouvert: <#${existing.channelId}>`,
-      ephemeral: true,
+      flags: 64,
     });
     return;
   }
 
-  await interaction.deferReply({ ephemeral: true });
+  await interaction.deferReply({ flags: 64 });
 
   try {
     const channel = await interaction.guild.channels.create({
@@ -97,11 +97,11 @@ async function closeTicket(interaction: ButtonInteraction) {
   const ticketData = tickets.get(ticketKey);
 
   if (!ticketData) {
-    await interaction.reply({ content: "❌ Ticket introuvable.", ephemeral: true });
+    await interaction.reply({ content: "❌ Ticket introuvable.", flags: 64 });
     return;
   }
 
-  await interaction.deferReply({ ephemeral: true });
+  await interaction.deferReply({ flags: 64 });
 
   const transcript = buildTranscript(ticketData);
 
