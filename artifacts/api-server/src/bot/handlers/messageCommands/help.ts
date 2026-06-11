@@ -31,6 +31,10 @@ export async function helpMessage(message: Message) {
         name: "✅ Vouches",
         value:
           "`!vouch add @m [commentaire]`\n`!vouch voir [@m]` `!vouch setup #salon`\n`!vouch compteur` `!vouch supprimer @m`",
+      },
+      {
+        name: "💳 Paiements",
+        value: "`!paiement` — Afficher les moyens de paiement",
       }
     )
     .setFooter({ text: "Préfixe: !" })

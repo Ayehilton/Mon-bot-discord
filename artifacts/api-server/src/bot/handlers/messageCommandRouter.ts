@@ -6,6 +6,7 @@ import { statsMessage } from "./messageCommands/stats.js";
 import { evaluationMessage } from "./messageCommands/evaluation.js";
 import { vouchMessage } from "./messageCommands/vouch.js";
 import { helpMessage } from "./messageCommands/help.js";
+import { paiementMessage } from "./messageCommands/paiement.js";
 import { logger } from "../../lib/logger.js";
 
 export const PREFIX = "!";
@@ -45,6 +46,11 @@ export async function handleMessageCommand(message: Message) {
       case "help":
       case "aide":
         await helpMessage(message);
+        break;
+      case "paiement":
+      case "paiements":
+      case "payment":
+        await paiementMessage(message);
         break;
       default:
         break;
