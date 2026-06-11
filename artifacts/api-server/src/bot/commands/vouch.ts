@@ -8,6 +8,7 @@ import {
 import type { SlashCommand } from "../types.js";
 import { vouches, guildConfigs } from "../store.js";
 import { logger } from "../../lib/logger.js";
+import { updateVoiceCounter } from "../utils/voiceCounter.js";
 
 export const data = new SlashCommandBuilder()
   .setName("vouch")
@@ -164,6 +165,8 @@ export const execute: SlashCommand["execute"] = async (
     if (config?.vouchCounterChannelId) {
       await updateCounter(interaction.guild, guildId);
     }
+
+    await updateVoiceCounter(interaction.guild, "vouch", list.length, "✅ Vouch");
 
     logger.info(
       `Vouch: ${interaction.user.tag} → ${target.tag} dans ${interaction.guild.name}`
