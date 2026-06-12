@@ -30,7 +30,7 @@ catalog:
   wouter: ^3.3.5
   zod: ^3.25.76
 
-minimumReleaseAge: 1440
+#minimumReleaseAge: 1440
 
 minimumReleaseAgeExclude:
   - '@replit/*'
