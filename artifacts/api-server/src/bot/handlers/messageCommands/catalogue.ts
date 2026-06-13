@@ -28,7 +28,7 @@ export async function catalogueMessage(message: Message, args: string[]) {
     case "ajoute": {
       const full = rest.join(" ").trim();
       if (!full || !full.includes("|")) {
-        await message.reply("❌ Syntaxe : `!catalogue add <nom> | <description>`\nExemple : `!catalogue add iPhone 15 Pro | Comme neuf, 800€ négociable`");
+        await message.reply("❌ Syntaxe : `!catalogue add <nom> | <description>`");
         return;
       }
       const [rawName, ...descParts] = full.split("|");
@@ -49,7 +49,6 @@ export async function catalogueMessage(message: Message, args: string[]) {
           { name: "📦 Nom", value: item.name, inline: true },
           { name: "📝 Description", value: item.description },
         )
-        .setFooter({ text: `Ajouté par ${message.author.username} • !catalogue pour tout voir` })
         .setTimestamp();
       await message.reply({ embeds: [embed] });
       return;
@@ -83,16 +82,16 @@ export async function catalogueMessage(message: Message, args: string[]) {
     default: {
       const list = getList(message.guild.id);
       if (list.length === 0) {
-        await message.reply("📦 Le catalogue est vide.\nAjoute un produit : `!catalogue add <nom> | <description>`");
+        await message.reply("📦 Le catalogue est vide.");
         return;
       }
       const items = list.slice(-25);
       const embed = new EmbedBuilder()
         .setTitle(`📦 Catalogue — ${message.guild.name}`)
         .setColor(0x5865f2)
-        .setDescription(`**${list.length}** produit(s) disponible(s).\nAjouter : \`!catalogue add <nom> | <desc>\``)
+        .setDescription(`**${list.length}** produit(s) disponible(s).`)
         .addFields(items.map((i) => ({ name: `#${i.id} — ${i.name}`, value: i.description.slice(0, 200) })))
-        .setFooter({ text: list.length > 25 ? `Affichage des 25 derniers / ${list.length} total` : `${list.length} produit(s) • !catalogue add pour ajouter` })
+        .setFooter({ text: list.length > 25 ? `Affichage des 25 derniers / ${list.length} total` : `${list.length} produit(s)` })
         .setTimestamp();
       await message.channel.send({ embeds: [embed] });
       return;
