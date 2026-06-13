@@ -8,6 +8,12 @@ import { vouchMessage } from "./messageCommands/vouch.js";
 import { helpMessage } from "./messageCommands/help.js";
 import { paiementMessage } from "./messageCommands/paiement.js";
 import { clearMessage } from "./messageCommands/clear.js";
+import { rulesMessage } from "./messageCommands/rules.js";
+import { catalogueMessage } from "./messageCommands/catalogue.js";
+import { pingMessage } from "./messageCommands/ping.js";
+import { serverinfoMessage } from "./messageCommands/serverinfo.js";
+import { userinfoMessage } from "./messageCommands/userinfo.js";
+import { avatarMessage } from "./messageCommands/avatar.js";
 import { logger } from "../../lib/logger.js";
 
 export const PREFIX = "!";
@@ -24,41 +30,38 @@ export async function handleMessageCommand(message: Message) {
 
   try {
     switch (command) {
-      case "ticket":
-        await ticketMessage(message, args);
-        break;
+      case "ticket": await ticketMessage(message, args); break;
       case "giveaway":
-      case "gw":
-        await giveawayMessage(message, args);
-        break;
-      case "mod":
-        await modMessage(message, args);
-        break;
-      case "stats":
-        await statsMessage(message, args);
-        break;
+      case "gw": await giveawayMessage(message, args); break;
+      case "mod": await modMessage(message, args); break;
+      case "stats": await statsMessage(message, args); break;
       case "evaluation":
-      case "eval":
-        await evaluationMessage(message, args);
-        break;
-      case "vouch":
-        await vouchMessage(message, args);
-        break;
+      case "eval": await evaluationMessage(message, args); break;
+      case "vouch": await vouchMessage(message, args); break;
       case "help":
-      case "aide":
-        await helpMessage(message);
-        break;
+      case "aide": await helpMessage(message); break;
       case "paiement":
       case "paiements":
-      case "payment":
-        await paiementMessage(message);
-        break;
+      case "payment": await paiementMessage(message); break;
       case "clear":
-      case "purge":
-        await clearMessage(message, args);
-        break;
-      default:
-        break;
+      case "purge": await clearMessage(message, args); break;
+      case "rules":
+      case "regles":
+      case "règles":
+      case "conditions": await rulesMessage(message); break;
+      case "catalogue":
+      case "catalog":
+      case "shop": await catalogueMessage(message, args); break;
+      case "ping": await pingMessage(message); break;
+      case "serverinfo":
+      case "serveur":
+      case "server": await serverinfoMessage(message); break;
+      case "userinfo":
+      case "user":
+      case "whois": await userinfoMessage(message, args); break;
+      case "avatar":
+      case "pp": await avatarMessage(message, args); break;
+      default: break;
     }
   } catch (err) {
     logger.error({ err }, `Erreur commande préfixe: !${command}`);
