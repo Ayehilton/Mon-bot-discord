@@ -31,7 +31,8 @@ export async function onInteractionCreate(interaction: Interaction) {
   if (interaction instanceof ButtonInteraction) {
     if (
       interaction.customId.startsWith("ticket_close_") ||
-      interaction.customId.startsWith("ticket_open")
+      interaction.customId.startsWith("ticket_open") ||
+      interaction.customId.startsWith("ticket_claim_")
     ) {
       await handleTicketButton(interaction);
     }
