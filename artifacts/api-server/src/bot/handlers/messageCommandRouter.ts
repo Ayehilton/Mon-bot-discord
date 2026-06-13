@@ -14,6 +14,9 @@ import { pingMessage } from "./messageCommands/ping.js";
 import { serverinfoMessage } from "./messageCommands/serverinfo.js";
 import { userinfoMessage } from "./messageCommands/userinfo.js";
 import { avatarMessage } from "./messageCommands/avatar.js";
+import { sayMessage } from "./messageCommands/say.js";
+import { annonceMessage } from "./messageCommands/annonce.js";
+import { sondageMessage } from "./messageCommands/sondage.js";
 import { logger } from "../../lib/logger.js";
 
 export const PREFIX = "!";
@@ -61,6 +64,13 @@ export async function handleMessageCommand(message: Message) {
       case "whois": await userinfoMessage(message, args); break;
       case "avatar":
       case "pp": await avatarMessage(message, args); break;
+      case "say":
+      case "dis":
+      case "repete": await sayMessage(message, args); break;
+      case "annonce":
+      case "announce": await annonceMessage(message, args); break;
+      case "sondage":
+      case "poll": await sondageMessage(message, args); break;
       default: break;
     }
   } catch (err) {
