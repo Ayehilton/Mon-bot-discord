@@ -26,3 +26,7 @@ export interface GuildConfig {
 }
 
 export const guildConfigs = new Map<string, GuildConfig>();
+
+// Count of regular (non-command) messages posted in the configured vouch channel.
+// Used to auto-increment the voice counter when members send their vouch screenshots.
+export const channelVouchCount = new Map<string, number>();
