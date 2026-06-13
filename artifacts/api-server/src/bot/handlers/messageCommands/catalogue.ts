@@ -1,55 +1,102 @@
-import type { Message } from "discord.js";
-import { ticketMessage } from "./messageCommands/ticket.js";
-import { giveawayMessage } from "./messageCommands/giveaway.js";
-import { modMessage } from "./messageCommands/mod.js";
-import { statsMessage } from "./messageCommands/stats.js";
-import { evaluationMessage } from "./messageCommands/evaluation.js";
-import { vouchMessage } from "./messageCommands/vouch.js";
-import { helpMessage } from "./messageCommands/help.js";
-import { paiementMessage } from "./messageCommands/paiement.js";
-import { clearMessage } from "./messageCommands/clear.js";
-import { rulesMessage } from "./messageCommands/rules.js";
-import { logger } from "../../lib/logger.js";
+typescript
+import { type Message, EmbedBuilder, PermissionFlagsBits } from "discord.js";
 
-export const PREFIX = "!";
+export interface CatalogueItem {
+  id: number;
+  name: string;
+  description: string;
+  authorId: string;
+  createdAt: Date;
+}
 
-export async function handleMessageCommand(message: Message) {
-  if (!message.content.startsWith(PREFIX) || message.author.bot) return;
+const catalogues = new Map<string, CatalogueItem[]>();
+let nextId = 1;
 
-  const raw = message.content.slice(PREFIX.length).trim();
-  const parts = raw.split(/\s+/);
-  const command = parts[0]?.toLowerCase();
-  const args = parts.slice(1);
+function getList(guildId: string): CatalogueItem[] {
+  if (!catalogues.has(guildId)) catalogues.set(guildId, []);
+  return catalogues.get(guildId)!;
+}
 
-  if (!command) return;
+export async function catalogueMessage(message: Message, args: string[]) {
+  if (!message.guild) return;
 
-  try {
-    switch (command) {
-      case "ticket": await ticketMessage(message, args); break;
-      case "giveaway":
-      case "gw": await giveawayMessage(message, args); break;
-      case "mod": await modMessage(message, args); break;
-      case "stats": await statsMessage(message, args); break;
-      case "evaluation":
-      case "eval": await evaluationMessage(message, args); break;
-      case "vouch": await vouchMessage(message, args); break;
-      case "help":
-      case "aide": await helpMessage(message); break;
-      case "paiement":
-      case "paiements":
-      case "payment": await paiementMessage(message); break;
-      case "clear":
-      case "purge": await clearMessage(message, args); break;
-      case "rules":
-      case "regles":
-      case "règles":
-      case "conditions": await rulesMessage(message); break;
-      default: break;
+  const sub = (args[0] ?? "list").toLowerCase();
+  const rest = args.slice(1);
+
+  switch (sub) {
+    case "add":
+    case "ajouter":
+    case "ajoute": {
+      const full = rest.join(" ").trim();
+      if (!full || !full.includes("|")) {
+        await message.reply("❌ Syntaxe : `!catalogue add <nom> | <description>`\nExemple : `!catalogue add iPhone 15 Pro | Comme neuf, 800€ négociable`");
+        return;
+      }
+      const [rawName, ...descParts] = full.split("|");
+      const name = rawName.trim().slice(0, 100);
+      const description = descParts.join("|").trim().slice(0, 500);
+      if (!name || !description) {
+        await message.reply("❌ Il faut un **nom** et une **description** séparés par `|`.");
+        return;
+      }
+      const list = getList(message.guild.id);
+      const item: CatalogueItem = { id: nextId++, name, description, authorId: message.author.id, createdAt: new Date() };
+      list.push(item);
+      const embed = new EmbedBuilder()
+        .setTitle("✅ Produit ajouté au catalogue")
+        .setColor(0x57f287)
+        .addFields(
+          { name: "🆔 ID", value: `#${item.id}`, inline: true },
+          { name: "📦 Nom", value: item.name, inline: true },
+          { name: "📝 Description", value: item.description },
+        )
+        .setFooter({ text: `Ajouté par ${message.author.username} • !catalogue pour tout voir` })
+        .setTimestamp();
+      await message.reply({ embeds: [embed] });
+      return;
     }
-  } catch (err) {
-    logger.error({ err }, `Erreur commande préfixe: !${command}`);
-    try {
-      await message.reply("❌ Une erreur est survenue lors de l'exécution de la commande.");
-    } catch {}
+    case "remove":
+    case "supprimer":
+    case "delete":
+    case "del": {
+      const isMod = message.member?.permissions.has(PermissionFlagsBits.ManageMessages);
+      if (!isMod) { await message.reply("🚫 Seuls les modérateurs peuvent supprimer un produit."); return; }
+      const id = parseInt(rest[0] ?? "", 10);
+      if (!id) { await message.reply("❌ Syntaxe : `!catalogue remove <id>`"); return; }
+      const list = getList(message.guild.id);
+      const idx = list.findIndex((i) => i.id === id);
+      if (idx === -1) { await message.reply(`❌ Aucun produit avec l'ID #${id}.`); return; }
+      const removed = list.splice(idx, 1)[0];
+      await message.reply(`🗑️ Produit **#${removed.id} — ${removed.name}** supprimé du catalogue.`);
+      return;
+    }
+    case "clear":
+    case "reset": {
+      const isAdmin = message.member?.permissions.has(PermissionFlagsBits.Administrator);
+      if (!isAdmin) { await message.reply("🚫 Seuls les administrateurs peuvent vider le catalogue."); return; }
+      catalogues.set(message.guild.id, []);
+      await message.reply("🗑️ Catalogue vidé.");
+      return;
+    }
+    case "list":
+    case "voir":
+    case "show":
+    default: {
+      const list = getList(message.guild.id);
+      if (list.length === 0) {
+        await message.reply("📦 Le catalogue est vide.\nAjoute un produit : `!catalogue add <nom> | <description>`");
+        return;
+      }
+      const items = list.slice(-25);
+      const embed = new EmbedBuilder()
+        .setTitle(`📦 Catalogue — ${message.guild.name}`)
+        .setColor(0x5865f2)
+        .setDescription(`**${list.length}** produit(s) disponible(s).\nAjouter : \`!catalogue add <nom> | <desc>\``)
+        .addFields(items.map((i) => ({ name: `#${i.id} — ${i.name}`, value: i.description.slice(0, 200) })))
+        .setFooter({ text: list.length > 25 ? `Affichage des 25 derniers / ${list.length} total` : `${list.length} produit(s) • !catalogue add pour ajouter` })
+        .setTimestamp();
+      await message.channel.send({ embeds: [embed] });
+      return;
+    }
   }
 }
