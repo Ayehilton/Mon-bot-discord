@@ -1,4 +1,3 @@
-typescript
 import { type Message, EmbedBuilder, PermissionFlagsBits } from "discord.js";
 
 export interface CatalogueItem {
