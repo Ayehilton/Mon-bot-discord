@@ -26,6 +26,8 @@ export async function handleTicketButton(interaction: ButtonInteraction) {
     await showCategoryMenu(interaction);
   } else if (interaction.customId.startsWith("ticket_close_")) {
     await closeTicket(interaction);
+  } else if (interaction.customId.startsWith("ticket_claim_")) {
+    await claimTicket(interaction);
   }
 }
 
@@ -149,6 +151,11 @@ async function openTicket(
 
     const row = new ActionRowBuilder<ButtonBuilder>().addComponents(
       new ButtonBuilder()
+        .setCustomId(`ticket_claim_${interaction.user.id}`)
+        .setLabel("Claim")
+        .setStyle(ButtonStyle.Success)
+        .setEmoji("🛎️"),
+      new ButtonBuilder()
         .setCustomId(`ticket_close_${interaction.user.id}`)
         .setLabel("Fermer le ticket")
         .setStyle(ButtonStyle.Danger)
@@ -166,6 +173,51 @@ async function openTicket(
     logger.error({ err }, "Erreur création ticket");
     await interaction.editReply({ content: "❌ Impossible de créer le ticket. Vérifie les permissions du bot." });
   }
+}
+
+async function claimTicket(interaction: ButtonInteraction) {
+  if (!interaction.guild || !interaction.channel || !interaction.message) return;
+
+  const isMod = interaction.memberPermissions?.has(PermissionFlagsBits.ManageMessages);
+  if (!isMod) {
+    await interaction.reply({
+      content: "🚫 Ce bouton est réservé au staff.",
+      flags: MessageFlags.Ephemeral,
+    });
+    return;
+  }
+
+  const userId = interaction.customId.replace("ticket_claim_", "");
+
+  const newRow = new ActionRowBuilder<ButtonBuilder>().addComponents(
+    new ButtonBuilder()
+      .setCustomId(`ticket_claimed_${interaction.user.id}`)
+      .setLabel(`Pris par ${interaction.user.username}`)
+      .setStyle(ButtonStyle.Secondary)
+      .setEmoji("✋")
+      .setDisabled(true),
+    new ButtonBuilder()
+      .setCustomId(`ticket_close_${userId}`)
+      .setLabel("Fermer le ticket")
+      .setStyle(ButtonStyle.Danger)
+      .setEmoji("🔒")
+  );
+
+  try {
+    await interaction.message.edit({ components: [newRow] });
+  } catch (err) {
+    logger.warn({ err }, "Impossible de mettre à jour les boutons du ticket");
+  }
+
+  await interaction.reply({
+    embeds: [
+      new EmbedBuilder()
+        .setTitle("🛎️ Ticket pris en charge")
+        .setDescription(`<@${interaction.user.id}> s'occupe désormais de ce ticket.`)
+        .setColor(0x57f287)
+        .setTimestamp(),
+    ],
+  });
 }
 
 async function closeTicket(interaction: ButtonInteraction) {
@@ -191,16 +243,8 @@ async function closeTicket(interaction: ButtonInteraction) {
             .setDescription(`Ton ticket dans **${interaction.guild.name}** a été fermé.`)
             .addFields(
               { name: "Catégorie", value: ticketData.reason ?? "Support", inline: true },
-              {
-                name: "Ouvert le",
-                value: ticketData.createdAt.toLocaleString("fr-FR"),
-                inline: true,
-              },
-              {
-                name: "Fermé le",
-                value: new Date().toLocaleString("fr-FR"),
-                inline: true,
-              }
+              { name: "Ouvert le", value: ticketData.createdAt.toLocaleString("fr-FR"), inline: true },
+              { name: "Fermé le", value: new Date().toLocaleString("fr-FR"), inline: true }
             )
             .setColor(0xed4245)
             .setTimestamp(),
@@ -264,4 +308,4 @@ function buildTranscript(ticketData: {
         `[${m.timestamp.toLocaleString("fr-FR")}] ${m.author}: ${m.content}`
     )
     .join("\n");
-}
+    }
