@@ -23,6 +23,7 @@ export const vouches = new Map<string, VouchData[]>();
 export interface GuildConfig {
   vouchChannelId?: string;
   vouchCounterChannelId?: string;
+  welcomeChannelId?: string;
 }
 
 export const guildConfigs = new Map<string, GuildConfig>();
