@@ -18,6 +18,7 @@ import { sayMessage } from "./messageCommands/say.js";
 import { annonceMessage } from "./messageCommands/annonce.js";
 import { sondageMessage } from "./messageCommands/sondage.js";
 import { inviteMessage } from "./messageCommands/invite.js";
+import { welcomeMessage } from "./messageCommands/welcome.js";
 import { logger } from "../../lib/logger.js";
 
 export const PREFIX = "!";
@@ -75,6 +76,8 @@ export async function handleMessageCommand(message: Message) {
       case "invite":
       case "invites":
       case "invitations": await inviteMessage(message, args); break;
+      case "welcome":
+      case "bienvenue": await welcomeMessage(message, args); break;
       default: break;
     }
   } catch (err) {
