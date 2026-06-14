@@ -1,9 +1,10 @@
-import { type Message, EmbedBuilder, PermissionFlagsBits } from "discord.js";
+import { type Message, PermissionFlagsBits } from "discord.js";
 
 export interface CatalogueItem {
   id: number;
   name: string;
-  description: string;
+  bullets: string[];
+  price: string | null;
   authorId: string;
   createdAt: Date;
 }
@@ -11,9 +12,58 @@ export interface CatalogueItem {
 const catalogues = new Map<string, CatalogueItem[]>();
 let nextId = 1;
 
+const SEP = "━━━━━━━━━━━━━━━━━━━━━━━━━━━━";
+const HEADER = "━━━━━━━━━━ LYGE SHOP ━━━━━━━━━━";
+
 function getList(guildId: string): CatalogueItem[] {
   if (!catalogues.has(guildId)) catalogues.set(guildId, []);
   return catalogues.get(guildId)!;
+}
+
+function looksLikePrice(s: string): boolean {
+  const lower = s.toLowerCase();
+  return (
+    lower.includes("€") ||
+    lower.includes("$") ||
+    lower.includes("ticket") ||
+    lower.includes("price") ||
+    lower.includes("prix") ||
+    /\d+([.,]\d+)?\s*(eur|euro|euros|ctm|cts|cent)/i.test(s)
+  );
+}
+
+function renderItem(item: CatalogueItem): string {
+  const lines: string[] = [];
+  lines.push(`**#${item.id}**  •  **${item.name}**`);
+  for (const b of item.bullets) {
+    lines.push(`➡️ ${b}`);
+  }
+  if (item.price) {
+    lines.push(`🌟  Price: ${item.price}`);
+  }
+  return lines.join("\n");
+}
+
+function renderCatalogue(list: CatalogueItem[]): string[] {
+  const parts: string[] = [HEADER];
+  for (const item of list) {
+    parts.push(SEP);
+    parts.push(renderItem(item));
+  }
+  parts.push(SEP);
+
+  // Split into chunks under 2000 chars (Discord limit)
+  const chunks: string[] = [];
+  let current = "";
+  for (const part of parts) {
+    if (current.length + part.length + 2 > 1900) {
+      chunks.push(current);
+      current = "";
+    }
+    current += (current ? "\n\n" : "") + part;
+  }
+  if (current) chunks.push(current);
+  return chunks;
 }
 
 export async function catalogueMessage(message: Message, args: string[]) {
@@ -28,29 +78,43 @@ export async function catalogueMessage(message: Message, args: string[]) {
     case "ajoute": {
       const full = rest.join(" ").trim();
       if (!full || !full.includes("|")) {
-        await message.reply("❌ Syntaxe : `!catalogue add <nom> | <description>`");
+        await message.reply(
+          "❌ Syntaxe : `!catalogue add <nom> | <détail 1> | <détail 2> | <prix>`\n" +
+            "Exemple : `!catalogue add Roblox Account | Full access | 10k Robux spent | 50€`",
+        );
         return;
       }
-      const [rawName, ...descParts] = full.split("|");
-      const name = rawName.trim().slice(0, 100);
-      const description = descParts.join("|").trim().slice(0, 500);
-      if (!name || !description) {
-        await message.reply("❌ Il faut un **nom** et une **description** séparés par `|`.");
+
+      const parts = full.split("|").map((p) => p.trim()).filter((p) => p.length > 0);
+      if (parts.length < 2) {
+        await message.reply("❌ Il faut au moins un nom et un détail.");
         return;
       }
+
+      const name = parts[0].slice(0, 100);
+      let bullets = parts.slice(1).map((p) => p.slice(0, 200));
+      let price: string | null = null;
+
+      const last = bullets[bullets.length - 1];
+      if (last && looksLikePrice(last)) {
+        price = last;
+        bullets = bullets.slice(0, -1);
+      }
+
       const list = getList(message.guild.id);
-      const item: CatalogueItem = { id: nextId++, name, description, authorId: message.author.id, createdAt: new Date() };
+      const item: CatalogueItem = {
+        id: nextId++,
+        name,
+        bullets,
+        price,
+        authorId: message.author.id,
+        createdAt: new Date(),
+      };
       list.push(item);
-      const embed = new EmbedBuilder()
-        .setTitle("✅ Produit ajouté au catalogue")
-        .setColor(0x57f287)
-        .addFields(
-          { name: "🆔 ID", value: `#${item.id}`, inline: true },
-          { name: "📦 Nom", value: item.name, inline: true },
-          { name: "📝 Description", value: item.description },
-        )
-        .setTimestamp();
-      await message.reply({ embeds: [embed] });
+
+      await message.reply(
+        "✅ Produit ajouté :\n\n" + renderItem(item),
+      );
       return;
     }
     case "remove":
@@ -58,20 +122,32 @@ export async function catalogueMessage(message: Message, args: string[]) {
     case "delete":
     case "del": {
       const isMod = message.member?.permissions.has(PermissionFlagsBits.ManageMessages);
-      if (!isMod) { await message.reply("🚫 Seuls les modérateurs peuvent supprimer un produit."); return; }
+      if (!isMod) {
+        await message.reply("🚫 Seuls les modérateurs peuvent supprimer un produit.");
+        return;
+      }
       const id = parseInt(rest[0] ?? "", 10);
-      if (!id) { await message.reply("❌ Syntaxe : `!catalogue remove <id>`"); return; }
+      if (!id) {
+        await message.reply("❌ Syntaxe : `!catalogue remove <id>`");
+        return;
+      }
       const list = getList(message.guild.id);
       const idx = list.findIndex((i) => i.id === id);
-      if (idx === -1) { await message.reply(`❌ Aucun produit avec l'ID #${id}.`); return; }
+      if (idx === -1) {
+        await message.reply(`❌ Aucun produit avec l'ID #${id}.`);
+        return;
+      }
       const removed = list.splice(idx, 1)[0];
-      await message.reply(`🗑️ Produit **#${removed.id} — ${removed.name}** supprimé du catalogue.`);
+      await message.reply(`🗑️ Produit **#${removed.id} — ${removed.name}** supprimé.`);
       return;
     }
     case "clear":
     case "reset": {
       const isAdmin = message.member?.permissions.has(PermissionFlagsBits.Administrator);
-      if (!isAdmin) { await message.reply("🚫 Seuls les administrateurs peuvent vider le catalogue."); return; }
+      if (!isAdmin) {
+        await message.reply("🚫 Seuls les administrateurs peuvent vider le catalogue.");
+        return;
+      }
       catalogues.set(message.guild.id, []);
       await message.reply("🗑️ Catalogue vidé.");
       return;
@@ -85,15 +161,10 @@ export async function catalogueMessage(message: Message, args: string[]) {
         await message.reply("📦 Le catalogue est vide.");
         return;
       }
-      const items = list.slice(-25);
-      const embed = new EmbedBuilder()
-        .setTitle(`📦 Catalogue — ${message.guild.name}`)
-        .setColor(0x5865f2)
-        .setDescription(`**${list.length}** produit(s) disponible(s).`)
-        .addFields(items.map((i) => ({ name: `#${i.id} — ${i.name}`, value: i.description.slice(0, 200) })))
-        .setFooter({ text: list.length > 25 ? `Affichage des 25 derniers / ${list.length} total` : `${list.length} produit(s)` })
-        .setTimestamp();
-      await message.channel.send({ embeds: [embed] });
+      const chunks = renderCatalogue(list);
+      for (const chunk of chunks) {
+        await message.channel.send({ content: chunk });
+      }
       return;
     }
   }
