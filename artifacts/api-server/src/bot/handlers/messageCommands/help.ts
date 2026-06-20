@@ -1,23 +1,89 @@
-import { type Message, EmbedBuilder } from "discord.js";
+import {
+  type Message,
+  EmbedBuilder,
+  ActionRowBuilder,
+  ButtonBuilder,
+  ButtonStyle,
+  type ButtonInteraction,
+  type GuildMember,
+  PermissionFlagsBits,
+} from "discord.js";
 
-export async function helpMessage(message: Message) {
+const ROLE_NAME = "Restock";
+
+export async function restockNotifMessage(message: Message): Promise<void> {
+  if (!message.guild) {
+    await message.reply("❌ Cette commande doit être utilisée dans un serveur.");
+    return;
+  }
+
+  const member = message.member as GuildMember;
+  if (!member.permissions.has(PermissionFlagsBits.Administrator)) {
+    await message.reply("❌ Tu dois être **administrateur** pour utiliser cette commande.");
+    return;
+  }
+
+  const restockRole = message.guild.roles.cache.find((r) => r.name === ROLE_NAME);
+  if (!restockRole) {
+    await message.reply(
+      `❌ Le rôle **${ROLE_NAME}** est introuvable.\n` +
+      `Crée-le dans **Paramètres du serveur → Rôles** puis réessaie.`
+    );
+    return;
+  }
+
+  await message.delete().catch(() => {});
+
   const embed = new EmbedBuilder()
-    .setTitle("📖 Commandes — LJI Market Bot")
-    .setColor(0x5865f2)
-    .addFields(
-      { name: "🎫 Tickets", value: "`!ticket setup` `!ticket list`" },
-      { name: "🎉 Giveaways", value: "`!giveaway start <min> [w<nb>] <prix>`\n`!giveaway end/reroll/list <id>`" },
-      { name: "🔨 Modération", value: "`!mod mute @m <min> [raison]`\n`!mod unmute/kick/ban @m [raison]`\n`!mod warn @m <raison>` `!mod warns/clearwarn @m`" },
-      { name: "📊 Stats", value: "`!stats serveur` `!stats utilisateur [@m]` `!stats support`" },
-      { name: "⭐ Évaluations", value: "`!evaluation panel` `!evaluation resultats`" },
-      { name: "✅ Vouches", value: "`!vouch add @m [commentaire]`\n`!vouch voir [@m]` `!vouch setup #salon`\n`!vouch compteur` `!vouch supprimer @m`" },
-      { name: "💳 Paiements", value: "`!paiement` — Afficher les moyens de paiement" },
-      { name: "🗑️ Clear", value: "`!clear <nombre>` — Supprimer des messages (1-100)" },
-      { name: "📜 Règles / Rules", value: "`!rules` — Règles du serveur (FR + EN)" },
-      { name: "📦 Catalogue", value: "`!catalogue` — Voir les produits\n`!catalogue add <nom> | <description>` — Ajouter\n`!catalogue remove <id>` — Supprimer (mod)" },
-      { name: "🛠️ Utilitaires", value: "`!ping` — Latence du bot\n`!serverinfo` — Infos du serveur\n`!userinfo [@m]` — Infos d'un membre\n`!avatar [@m]` — Avatar d'un membre" },
+    .setColor(0x00ff88)
+    .setTitle("🔔 Notifications Restock")
+    .setDescription(
+      "Tu veux être notifié dès qu'un produit est de nouveau dispo ?\n\n" +
+      `✅ **Clique une fois** → Tu reçois le rôle <@&${restockRole.id}>\n` +
+      `🔕 **Reclique** → Tu retires le rôle\n\n` +
+      `*Les membres avec ce rôle sont pingés à chaque restock.*`
     )
-    .setFooter({ text: "Préfixe: !" })
+    .setFooter({ text: "Clique pour activer / désactiver les notifs" })
     .setTimestamp();
-  await message.reply({ embeds: [embed] });
+
+  const row = new ActionRowBuilder<ButtonBuilder>().addComponents(
+    new ButtonBuilder()
+      .setCustomId("toggle_restock_role")
+      .setLabel("🔔 Recevoir les notifs Restock")
+      .setStyle(ButtonStyle.Success)
+  );
+
+  await message.channel.send({ embeds: [embed], components: [row] });
+}
+
+export async function handleRestockButton(interaction: ButtonInteraction): Promise<void> {
+  const guild = interaction.guild;
+  if (!guild) return;
+
+  const member = interaction.member as GuildMember;
+  const restockRole = guild.roles.cache.find((r) => r.name === ROLE_NAME);
+
+  if (!restockRole) {
+    await interaction.reply({
+      content: `❌ Le rôle **${ROLE_NAME}** est introuvable. Contacte un admin.`,
+      ephemeral: true,
+    });
+    return;
+  }
+
+  const hasRole = member.roles.cache.has(restockRole.id);
+
+  if (hasRole) {
+    await member.roles.remove(restockRole);
+    await interaction.reply({
+      content: "🔕 Tu ne recevras **plus** les notifications de restock.",
+      ephemeral: true,
+    });
+  } else {
+    await member.roles.add(restockRole);
+    await interaction.reply({
+      content: `🔔 Tu recevras désormais les **notifications de restock** ! (<@&${restockRole.id}>)`,
+      ephemeral: true,
+    });
+  }
 }
