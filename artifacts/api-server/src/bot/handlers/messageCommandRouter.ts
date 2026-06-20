@@ -20,6 +20,8 @@ import { sondageMessage } from "./messageCommands/sondage.js";
 import { inviteMessage } from "./messageCommands/invite.js";
 import { welcomeMessage } from "./messageCommands/welcome.js";
 import { pubMessage } from "./messageCommands/pub.js";
+// ✅ NOUVEAU
+import { restockNotifMessage } from "./messageCommands/restockNotif.js";
 import { logger } from "../../lib/logger.js";
 
 export const PREFIX = "!";
@@ -82,6 +84,10 @@ export async function handleMessageCommand(message: Message) {
       case "pub":
       case "ad":
       case "promo": await pubMessage(message, args); break;
+      // ✅ NOUVEAU
+      case "restock-notif":
+      case "restocknotif":
+      case "restock": await restockNotifMessage(message); break;
       default: break;
     }
   } catch (err) {
