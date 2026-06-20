@@ -8,6 +8,8 @@ import { logger } from "../../lib/logger.js";
 import { handleTicketButton, handleTicketCategorySelect } from "../handlers/ticketHandler.js";
 import { handleRatingSelect } from "../handlers/ratingHandler.js";
 import { handleGiveawayJoin } from "../handlers/giveawayHandler.js";
+// ✅ NOUVEAU
+import { handleRestockButton } from "../handlers/messageCommands/restockNotif.js";
 
 export async function onInteractionCreate(interaction: Interaction) {
   if (interaction.isChatInputCommand()) {
@@ -29,6 +31,11 @@ export async function onInteractionCreate(interaction: Interaction) {
   }
 
   if (interaction instanceof ButtonInteraction) {
+    // ✅ NOUVEAU - Bouton restock
+    if (interaction.customId === "toggle_restock_role") {
+      await handleRestockButton(interaction);
+      return;
+    }
     if (
       interaction.customId.startsWith("ticket_close_") ||
       interaction.customId.startsWith("ticket_open") ||
