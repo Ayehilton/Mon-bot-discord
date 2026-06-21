@@ -15,43 +15,31 @@ export async function helpMessage(message: Message) {
       },
       {
         name: "🔨 Modération",
-        value: "`!mod mute @m <min> [raison]`\n`!mod unmute/kick/ban @m [raison]`\n`!mod warn @m <raison>` `!mod warns/clearwarn @m`",
+        value: "`!mod mute/unmute/kick/ban/warn @m`\n`!clear <nombre>` `!slowmode <secondes>`\n`!lock` `!unlock` `!say <texte>` `!annonce <texte>`",
       },
       {
-        name: "📊 Stats",
-        value: "`!stats serveur` `!stats utilisateur [@m]` `!stats support`",
-      },
-      {
-        name: "⭐ Évaluations",
-        value: "`!evaluation panel` `!evaluation resultats`",
+        name: "📊 Stats & Évaluations",
+        value: "`!stats serveur/utilisateur/support`\n`!evaluation panel` `!evaluation resultats`\n`!sondage <question>`",
       },
       {
         name: "✅ Vouches",
         value: "`!vouch add @m [commentaire]`\n`!vouch voir [@m]` `!vouch setup #salon`\n`!vouch compteur` `!vouch supprimer @m`",
       },
       {
-        name: "💳 Paiements",
-        value: "`!paiement` — Afficher les moyens de paiement",
-      },
-      {
-        name: "🗑️ Clear",
-        value: "`!clear <nombre>` — Supprimer des messages (1-100)",
+        name: "🛒 Restock & Boutique",
+        value: "`!restock <description>` — Poster un restock\n`!restock-notif` *(admin)* — Bouton abonnement notifs\n`!catalogue` — Voir les produits\n`!paiement` — Moyens de paiement",
       },
       {
         name: "📋 Règles / Rules",
         value: "`!rules` — Règles du serveur (FR + EN)",
       },
       {
-        name: "📦 Catalogue",
-        value: "`!catalogue` — Voir les produits\n`!catalogue add <nom> | <description>` — Ajouter\n`!catalogue remove <id>` — Supprimer (mod)",
+        name: "❓ Aide & Contact",
+        value: "`!faq` — Questions fréquentes\n`!contact` — Contacter le support\n`!invite` — Invitations",
       },
       {
         name: "🔧 Utilitaires",
-        value: "`!ping` — Latence du bot\n`!serverinfo` — Infos du serveur\n`!userinfo [@m]` — Infos d'un membre\n`!avatar [@m]` — Avatar d'un membre",
-      },
-      {
-        name: "🔔 Notifications Restock",
-        value: "`!restock-notif` *(admin)* — Poster le bouton d'abonnement aux notifs restock",
+        value: "`!ping` `!serverinfo` `!userinfo [@m]` `!avatar [@m]`",
       },
     )
     .setFooter({ text: "Préfixe: !" })
