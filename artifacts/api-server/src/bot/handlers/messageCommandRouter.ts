@@ -20,8 +20,12 @@ import { sondageMessage } from "./messageCommands/sondage.js";
 import { inviteMessage } from "./messageCommands/invite.js";
 import { welcomeMessage } from "./messageCommands/welcome.js";
 import { pubMessage } from "./messageCommands/pub.js";
-// ✅ NOUVEAU
 import { restockNotifMessage } from "./messageCommands/restockNotif.js";
+import { restockMessage } from "./messageCommands/restock.js";
+import { slowmodeMessage } from "./messageCommands/slowmode.js";
+import { lockMessage, unlockMessage } from "./messageCommands/lock.js";
+import { faqMessage } from "./messageCommands/faq.js";
+import { contactMessage } from "./messageCommands/contact.js";
 import { logger } from "../../lib/logger.js";
 
 export const PREFIX = "!";
@@ -49,51 +53,39 @@ export async function handleMessageCommand(message: Message) {
       case "help":
       case "aide": await helpMessage(message); break;
       case "paiement":
-      case "paiements":
       case "payment": await paiementMessage(message); break;
       case "clear":
       case "purge": await clearMessage(message, args); break;
       case "rules":
-      case "regles":
-      case "règles":
-      case "conditions": await rulesMessage(message); break;
+      case "regles": await rulesMessage(message); break;
       case "catalogue":
-      case "catalog":
       case "shop": await catalogueMessage(message, args); break;
       case "ping": await pingMessage(message); break;
-      case "serverinfo":
-      case "serveur":
-      case "server": await serverinfoMessage(message); break;
+      case "serverinfo": await serverinfoMessage(message); break;
       case "userinfo":
-      case "user":
       case "whois": await userinfoMessage(message, args); break;
       case "avatar":
       case "pp": await avatarMessage(message, args); break;
-      case "say":
-      case "dis":
-      case "repete": await sayMessage(message, args); break;
-      case "annonce":
-      case "announce": await annonceMessage(message, args); break;
+      case "say": await sayMessage(message, args); break;
+      case "annonce": await annonceMessage(message, args); break;
       case "sondage":
       case "poll": await sondageMessage(message, args); break;
-      case "invite":
-      case "invites":
-      case "invitations": await inviteMessage(message, args); break;
-      case "welcome":
-      case "bienvenue": await welcomeMessage(message, args); break;
-      case "pub":
-      case "ad":
-      case "promo": await pubMessage(message, args); break;
-      // ✅ NOUVEAU
-      case "restock-notif":
-      case "restocknotif":
-      case "restock": await restockNotifMessage(message); break;
+      case "invite": await inviteMessage(message, args); break;
+      case "welcome": await welcomeMessage(message, args); break;
+      case "pub": await pubMessage(message, args); break;
+      case "restock-notif": await restockNotifMessage(message); break;
+      case "restock": await restockMessage(message, args); break;
+      case "slowmode": await slowmodeMessage(message, args); break;
+      case "lock": await lockMessage(message); break;
+      case "unlock": await unlockMessage(message); break;
+      case "faq": await faqMessage(message); break;
+      case "contact": await contactMessage(message); break;
       default: break;
     }
   } catch (err) {
-    logger.error({ err }, `Erreur commande préfixe: !${command}`);
+    logger.error({ err }, `Erreur commande: !${command}`);
     try {
-      await message.reply("❌ Une erreur est survenue lors de l'exécution de la commande.");
+      await message.reply("❌ Une erreur est survenue.");
     } catch {}
   }
 }
