@@ -21,6 +21,11 @@ const CATEGORY_LABELS: Record<string, { label: string; emoji: string; color: num
   autre: { label: "Autre demande", emoji: "💬", color: 0x5865f2 },
 };
 
+// Génère un ID de commande unique
+function generateCommandeId(): string {
+  return `CMD-${Date.now().toString(36).toUpperCase()}`;
+}
+
 export async function handleTicketButton(interaction: ButtonInteraction) {
   if (interaction.customId === "ticket_open") {
     await showCategoryMenu(interaction);
@@ -106,6 +111,9 @@ async function openTicket(
 
   const cat = CATEGORY_LABELS[category] ?? CATEGORY_LABELS["autre"]!;
 
+  // Génère un ID de commande uniquement pour les tickets d'achat
+  const commandeId = category === "achat" ? generateCommandeId() : null;
+
   try {
     const channel = await interaction.guild.channels.create({
       name: `${cat.emoji}-${interaction.user.username}`,
@@ -134,18 +142,34 @@ async function openTicket(
       createdAt: new Date(),
       reason: cat.label,
       category,
+      commandeId: commandeId ?? undefined,
       messages: [] as { author: string; content: string; timestamp: Date }[],
     };
 
     tickets.set(ticketKey, ticketData);
     tickets.set("chan_" + channel.id, ticketData);
 
+    // Embed principal du ticket
+    const embedFields: { name: string; value: string; inline?: boolean }[] = [
+      { name: "Catégorie", value: `${cat.emoji} ${cat.label}`, inline: true },
+    ];
+
+    // ✅ Si c'est un ticket achat → affiche l'ID de commande
+    if (commandeId) {
+      embedFields.push({
+        name: "🆔 ID de commande",
+        value: `\`${commandeId}\``,
+        inline: true,
+      });
+    }
+
     const embed = new EmbedBuilder()
       .setTitle(`${cat.emoji} ${cat.label}`)
       .setDescription(
-        `Bienvenue <@${interaction.user.id}> !\n\nExplique ton problème avec le plus de détails possible, un membre du staff te répondra rapidement.`
+        `Bienvenue <@${interaction.user.id}> !\n\nExplique ton problème avec le plus de détails possible, un membre du staff te répondra rapidement.` +
+        (commandeId ? `\n\n📦 Ton **ID de commande** est \`${commandeId}\` — garde-le précieusement !` : "")
       )
-      .addFields({ name: "Catégorie", value: `${cat.emoji} ${cat.label}`, inline: true })
+      .addFields(embedFields)
       .setColor(cat.color)
       .setTimestamp();
 
@@ -230,7 +254,6 @@ async function closeTicket(interaction: ButtonInteraction) {
   const chanKey = "chan_" + interaction.channel.id;
 
   const ticketData = tickets.get(ticketKey) ?? tickets.get(chanKey);
-
   const transcript = ticketData ? buildTranscript(ticketData) : "";
 
   if (ticketData) {
@@ -243,8 +266,9 @@ async function closeTicket(interaction: ButtonInteraction) {
             .setDescription(`Ton ticket dans **${interaction.guild.name}** a été fermé.`)
             .addFields(
               { name: "Catégorie", value: ticketData.reason ?? "Support", inline: true },
+              ...(ticketData.commandeId ? [{ name: "🆔 ID Commande", value: `\`${ticketData.commandeId}\``, inline: true }] : []),
               { name: "Ouvert le", value: ticketData.createdAt.toLocaleString("fr-FR"), inline: true },
-              { name: "Fermé le", value: new Date().toLocaleString("fr-FR"), inline: true }
+              { name: "Fermé le", value: new Date().toLocaleString("fr-FR"), inline: true },
             )
             .setColor(0xed4245)
             .setTimestamp(),
@@ -308,4 +332,4 @@ function buildTranscript(ticketData: {
         `[${m.timestamp.toLocaleString("fr-FR")}] ${m.author}: ${m.content}`
     )
     .join("\n");
-    }
+}
